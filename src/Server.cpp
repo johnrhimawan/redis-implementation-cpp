@@ -54,8 +54,15 @@ int main(int argc, char **argv) {
   }
   std::cout << "Client connected\n";
 
-  std::string response = "+PONG\r\n";
-  send(client_fd, response.c_str(), response.size(), 0);
+  while (true) {
+    char buffer[1024];
+    if (recv(client_fd, buffer, sizeof(buffer), 0) < 0) {
+      std::cerr << "Failed to receive message\n";
+      return 1;
+    }
+    std::string response = "+PONG\r\n";
+    send(client_fd, response.c_str(), response.size(), 0);
+  }
 
   close(client_fd);
   close(server_fd);
