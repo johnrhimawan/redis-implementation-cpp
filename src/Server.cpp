@@ -10,14 +10,16 @@
 #include <thread>
 
 void handleClient(int client_fd) {
+  std::string response = "+PONG\r\n";
+  
   while (true) {
     char buffer[1024];
-    if (recv(client_fd, buffer, sizeof(buffer), 0) < 0) {
+    if (recv(client_fd, &buffer, sizeof(buffer), 0) <= 0) {
       std::cerr << "Failed to receive message\n";
       close(client_fd);
       return;
     }
-    std::string response = "+PONG\r\n";
+    
     send(client_fd, response.c_str(), response.size(), 0);
   }
 }
