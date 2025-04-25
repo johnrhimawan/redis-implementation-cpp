@@ -7,6 +7,20 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <thread>
+
+void handleClient(int client_fd) {
+  while (true) {
+    char buffer[1024];
+    if (recv(client_fd, buffer, sizeof(buffer), 0) < 0) {
+      std::cerr << "Failed to receive message\n";
+      close(client_fd);
+      return;
+    }
+    std::string response = "+PONG\r\n";
+    send(client_fd, response.c_str(), response.size(), 0);
+  }
+}
 
 int main(int argc, char **argv) {
   // Flush after every std::cout / std::cerr
@@ -43,28 +57,22 @@ int main(int argc, char **argv) {
     return 1;
   }
   
-  struct sockaddr_in client_addr;
-  int client_addr_len = sizeof(client_addr);
-  std::cout << "Waiting for a client to connect...\n";
-
-  int client_fd = accept(server_fd, (struct sockaddr *) &client_addr, (socklen_t *) &client_addr_len);
-  if (client_fd < 0) {
-    std::cerr << "Failed to accept client connection\n";
-    return 1;
-  }
-  std::cout << "Client connected\n";
-
   while (true) {
-    char buffer[1024];
-    if (recv(client_fd, buffer, sizeof(buffer), 0) < 0) {
-      std::cerr << "Failed to receive message\n";
+    struct sockaddr_in client_addr;
+    int client_addr_len = sizeof(client_addr);
+    std::cout << "Waiting for a client to connect...\n";
+  
+    int client_fd = accept(server_fd, (struct sockaddr *) &client_addr, (socklen_t *) &client_addr_len);
+    if (client_fd < 0) {
+      std::cerr << "Failed to accept client connection\n";
       return 1;
     }
-    std::string response = "+PONG\r\n";
-    send(client_fd, response.c_str(), response.size(), 0);
+    std::cout << "Client connected\n";
+
+    std::thread client_handler(handleClient, client_fd);
+    client_handler.detach();
   }
 
-  close(client_fd);
   close(server_fd);
 
   return 0;
