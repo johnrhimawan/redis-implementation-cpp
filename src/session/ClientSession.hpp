@@ -1,3 +1,6 @@
+#include "protocol/RESPObject.hpp"
+#include "command/CommandRegistry.hpp"
+
 namespace redis::session {
 
 class ClientSession {
