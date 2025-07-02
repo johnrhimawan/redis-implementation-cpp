@@ -7,6 +7,7 @@
 #include "protocol/RESPWriter.hpp"
 #include "command/CommandRegistry.hpp"
 #include <vector>
+#include "storage/Storage.hpp"
 
 using namespace redis::session;
 using namespace redis::protocol;
@@ -14,6 +15,7 @@ using namespace redis::command;
 
 namespace {
 static CommandRegistry registry;
+static redis::storage::Storage kv_store;
 static bool initialized = false;
 }
 
@@ -21,7 +23,7 @@ ClientSession::ClientSession(int fd)
   : _fd(fd)
 {
   if (!initialized) {
-    CommandRegistry::initialize(registry);
+    CommandRegistry::initialize(registry, kv_store);
     initialized = true;
   }
 }

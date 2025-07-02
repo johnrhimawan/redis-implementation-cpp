@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <functional>
 #include <memory>
+#include "storage/Storage.hpp"
 
 namespace redis::command {
 
@@ -24,7 +25,7 @@ public:
     return it->second(resp_object);
   }
 
-  static void initialize(CommandRegistry&);
+  static void initialize(CommandRegistry&, redis::storage::Storage&);
 
 private:
   std::unordered_map<std::string, Factory> _factories;
